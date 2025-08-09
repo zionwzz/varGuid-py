@@ -20,17 +20,12 @@ Original R Package: https://github.com/luminwin/varGuid
 """
 
 from .core.irls import VarGuidRegressor
-from .core.clustering import ConvexClustering, ArtificialGrouping
-from .data.datasets import load_cobra2d
 
 __version__ = "0.1.0"
 __author__ = "Zihao Wang (Python port)"
 __original_authors__ = "Sibei Liu, Min Lu"
-__email__ = "YOUR_EMAIL@example.com"
+__email__ = "zxw832@miami.edu"  # Replace with your email
 
 __all__ = [
-    "VarGuidRegressor",
-    "ConvexClustering", 
-    "ArtificialGrouping",
-    "load_cobra2d"
+    "VarGuidRegressor"
 ]

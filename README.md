@@ -7,10 +7,9 @@ A Python implementation of advanced regression techniques to address heterosceda
 
 ## Features
 
-The package implements two key algorithms:
+The package implements the following algorithm:
 
 1. **Iteratively Reweighted Least Squares (IRLS)**: Robust coefficient estimation under linear variance patterns
-2. **Biconvex Algorithm with Artificial Grouping**: Creates artificial grouping effects to capture nonlinear relationships using convex clustering
 
 ## Original Authors & Research
 
@@ -108,24 +107,6 @@ varguid_lasso = VarGuidRegressor(
 varguid_lasso.fit(X_train.values, y_train.values)
 ```
 
-### Artificial Grouping for Nonlinear Relationships
-
-```python
-# Create artificial grouping effects
-grouping_model = ArtificialGrouping(
-    varguid_model=varguid_model,
-    n_neighbors=10,
-    gamma_values=np.linspace(0, 9, 5),
-    phi=0.45
-)
-
-grouping_model.fit(X_train.values, y_train.values)
-
-# Get enhanced predictions
-predictions = grouping_model.predict(X_test.values)
-print("Available predictions:", list(predictions.keys()))
-```
-
 ## API Reference
 
 ### Core Classes
@@ -147,20 +128,6 @@ Main regression class implementing the VarGuid method.
 - `predict(X)`: Make predictions
 - `get_inference_results()`: Get coefficient estimates and diagnostics
 
-#### `ArtificialGrouping`
-
-Creates artificial grouping effects for capturing nonlinear relationships.
-
-**Parameters:**
-- `varguid_model`: Fitted VarGuidRegressor instance
-- `n_neighbors` (int): Number of nearest neighbors for clustering (default: 10)
-- `gamma_values` (array-like): Regularization parameters for clustering
-- `phi` (float): Kernel parameter for weight computation (default: 0.45)
-- `random_state` (int): Random seed for reproducibility
-
-**Methods:**
-- `fit(X, y)`: Fit the grouping model
-- `predict(X)`: Make enhanced predictions with grouping effects
 
 ### Utility Functions
 
@@ -173,116 +140,6 @@ Creates artificial grouping effects for capturing nonlinear relationships.
 - `create_feature_target_split(data, target_column)`: Separate features and target
 - `evaluate_predictions(y_true, predictions_dict)`: Compute RMSE for multiple methods
 - `compute_rmse(y_true, y_pred)`: Compute Root Mean Square Error
-
-## Examples
-
-### Complete Workflow Example
-
-```python
-from varguid import VarGuidRegressor, ArtificialGrouping, load_cobra2d
-from varguid.utils.helpers import *
-import numpy as np
-
-# Load and prepare data
-dataset = load_cobra2d()
-data = dataset['data']
-print(f"True formula: {dataset['formula']}")
-
-# Train/test split
-train_data, test_data, _, _ = train_test_split_by_indices(
-    data, test_size=0.4, random_state=1
-)
-X_train, y_train = create_feature_target_split(train_data)
-X_test, y_test = create_feature_target_split(test_data)
-
-# Fit multiple models
-models = {}
-
-# 1. VarGuid IRLS
-models['VarGuid_IRLS'] = VarGuidRegressor(use_lasso=False)
-models['VarGuid_IRLS'].fit(X_train.values, y_train.values)
-
-# 2. VarGuid Lasso
-models['VarGuid_Lasso'] = VarGuidRegressor(use_lasso=True)
-models['VarGuid_Lasso'].fit(X_train.values, y_train.values)
-
-# Make predictions
-predictions = {}
-for name, model in models.items():
-    predictions[name] = model.predict(X_test.values)
-
-# Evaluate performance
-rmse_results = evaluate_predictions(y_test.values, predictions)
-print(format_results_table(rmse_results))
-```
-
-## Comparison with R Package
-
-This Python implementation closely follows the original R package API:
-
-| R Function | Python Equivalent | Notes |
-|------------|------------------|-------|
-| `lmv()` | `VarGuidRegressor` | Main regression function |
-| `ymodv()` | `ArtificialGrouping` | Artificial grouping effects |
-| `predict.varGuid()` | `ArtificialGrouping.predict()` | Enhanced predictions |
-| `data(cobra2d)` | `load_cobra2d()` | Load example dataset |
-
-### Key Differences
-
-1. **Object-Oriented Design**: Python version uses scikit-learn style classes
-2. **Convex Clustering**: Simplified implementation using CVXPY instead of cvxclustr
-3. **Random Forest**: Uses scikit-learn's RandomForestRegressor instead of randomForestSRC
-4. **Dependencies**: Uses standard Python scientific stack
-
-## Performance Notes
-
-- The convex clustering implementation is simplified and may not match the original R version exactly
-- For large datasets, consider using `use_lasso=True` for better computational efficiency
-- The artificial grouping step is computationally intensive and optional for coefficient estimation
-
-## Development
-
-### Running Tests
-
-```bash
-# Install development dependencies
-pip install -e ".[dev]"
-
-# Run tests
-pytest tests/
-
-# Run with coverage
-pytest --cov=varguid tests/
-```
-
-### Code Formatting
-
-```bash
-# Format code
-black varguid/ tests/ examples/
-
-# Lint code
-flake8 varguid/ tests/ examples/
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **CVXPY Installation**: If you encounter issues installing CVXPY, try:
-   ```bash
-   conda install -c conda-forge cvxpy
-   ```
-
-2. **Memory Issues with Large Datasets**: For datasets with >1000 samples, consider:
-   - Using `use_lasso=True` 
-   - Reducing `n_neighbors` in ArtificialGrouping
-   - Skipping the artificial grouping step
-
-3. **Convergence Issues**: If the IRLS algorithm doesn't converge:
-   - Increase `max_iter`
-   - Decrease `step` parameter
-   - Check for highly correlated features
 
 ### Getting Help
 

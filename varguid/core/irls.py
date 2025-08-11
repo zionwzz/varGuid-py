@@ -1,7 +1,3 @@
-"""
-Iteratively Reweighted Least Squares (IRLS) implementation for VarGuid regression.
-"""
-
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, RegressorMixin
@@ -13,11 +9,6 @@ import warnings
 
 class VarGuidRegressor(BaseEstimator, RegressorMixin):
     """
-    Variance Guided Regression using Iteratively Reweighted Least Squares.
-    
-    This estimator implements the VarGuid method for robust coefficient estimation
-    under linear variance patterns using either IRLS or iteratively reweighted Lasso.
-    
     Parameters
     ----------
     max_iter : int, default=10
@@ -64,7 +55,7 @@ class VarGuidRegressor(BaseEstimator, RegressorMixin):
         self.cv_folds = cv_folds
         
     def _estimate_beta(self, X, y, weights, step):
-        """Estimate coefficients with given weights."""
+
         sample_weights = np.exp(-step * weights)
         
         if self.use_lasso:
@@ -86,7 +77,7 @@ class VarGuidRegressor(BaseEstimator, RegressorMixin):
         return estimator
     
     def _estimate_weights(self, X, residuals):
-        """Estimate variance weights from residuals."""
+
         X_squared = X ** 2
         residuals_squared = residuals ** 2
         
@@ -113,8 +104,6 @@ class VarGuidRegressor(BaseEstimator, RegressorMixin):
     
     def fit(self, X, y):
         """
-        Fit the VarGuid regression model.
-        
         Parameters
         ----------
         X : array-like of shape (n_samples, n_features)
@@ -130,10 +119,8 @@ class VarGuidRegressor(BaseEstimator, RegressorMixin):
         X, y = check_X_y(X, y)
         n_samples, n_features = X.shape
         
-        # Initialize with uniform weights
         weights = np.ones(n_samples)
         
-        # Initial estimation (OLS or Lasso)
         initial_estimator = self._estimate_beta(X, y, weights, self.step)
         self.ols_estimator_ = initial_estimator if not self.use_lasso else None
         self.lasso_estimator_ = initial_estimator if self.use_lasso else None
@@ -141,23 +128,18 @@ class VarGuidRegressor(BaseEstimator, RegressorMixin):
         current_estimator = initial_estimator
         current_coef = np.concatenate([[current_estimator.intercept_], current_estimator.coef_])
         
-        # IRLS iterations
         step = self.step
         
         for iteration in range(self.max_iter):
             old_coef = current_coef.copy()
             
-            # Get residuals
             residuals = y - current_estimator.predict(X)
             
-            # Estimate new weights
             weights, weight_estimator = self._estimate_weights(X, residuals)
             
-            # Estimate new coefficients
             current_estimator = self._estimate_beta(X, y, weights, step)
             current_coef = np.concatenate([[current_estimator.intercept_], current_estimator.coef_])
             
-            # Check convergence
             diff = np.sum((current_coef - old_coef) ** 2)
             
             if diff <= self.tol:
@@ -179,8 +161,6 @@ class VarGuidRegressor(BaseEstimator, RegressorMixin):
     
     def predict(self, X):
         """
-        Predict using the VarGuid model.
-        
         Parameters
         ----------
         X : array-like of shape (n_samples, n_features)
@@ -196,11 +176,6 @@ class VarGuidRegressor(BaseEstimator, RegressorMixin):
     
     def get_inference_results(self):
         """
-        Get inference results including various robust standard errors.
-        
-        Note: This is a simplified version. For full robust inference,
-        consider using statsmodels or implementing robust covariance matrices.
-        
         Returns
         -------
         dict : Dictionary containing coefficient estimates and basic statistics

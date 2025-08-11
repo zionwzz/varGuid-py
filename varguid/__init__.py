@@ -27,5 +27,7 @@ __original_authors__ = "Sibei Liu, Min Lu"
 __email__ = "zxw832@miami.edu"  # Replace with your email
 
 __all__ = [
-    "VarGuidRegressor"
+    "VarGuidRegressor",
+    "load_cobra2d", 
+    "generate_cobra2d"
 ]

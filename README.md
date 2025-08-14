@@ -54,18 +54,11 @@ cd varGuid-py
 pip install -e .
 ```
 
-#### Option 3: Development installation
-```bash
-git clone https://github.com/zionwzz/varGuid-py.git
-cd varGuid-py
-pip install -e ".[dev]"
-```
-
 ## Quick Start
 
 ```python
 import numpy as np
-from varguid import VarGuidRegressor, ArtificialGrouping, load_cobra2d
+from varguid import VarGuidRegressor, load_cobra2d
 from varguid.utils.helpers import train_test_split_by_indices, create_feature_target_split
 
 # Load example dataset
